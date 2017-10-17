@@ -1,7 +1,7 @@
 # Powershell Http Monitor Tool
 This is a Powershell tool for monitoring a set of http hosts that logs into MSSQL database. 
 
-## Why
+## Why a Powershell tool to Monitor Http resources
 This tool need as a swiss knife for monitoring websites without using external service or installing complex softwares. It may be needed to monitor some site, also for testing\debugging purpouses and you don't want to spend too much time adopting huge tools. Or you may need a monitor tool that can be customized to collect complex statistics or add business login into monitor.
 
 ## How it works
