@@ -8,7 +8,11 @@ This tool need as a swiss knife for monitoring websites without using external s
 Because this project is build trying to keep it as much simple as possible, it is just a simple power shell script. This means you'll just have to *download a single file and run*. No worry about install process, download frameworks or prerequisites. Just download and run. Easy right? This will install you powershell as a windows service. All settings can be tuned directly into the script or using an external config file. Once service is running, he periodically reload the website list and try to call each entry, saving result into database.
 
 ## How to install
-Simply, Powershell Http Monitor tool has two possible usage.
+Simply, Powershell Http Monitor tool has tre possible usage.
+
+- As a standalone application, to be manually run
+- As a scheduled task, to be scheduled periodically
+- As a service, to run continuosly in background
 
 ### Run once
 Running this command the script read all websites, try to call them and finally download results into MSSQL database or log files. This usage mode desn't require any installation. It may be also scheduled using windows scheduled tasks.
