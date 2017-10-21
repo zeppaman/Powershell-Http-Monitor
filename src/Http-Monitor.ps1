@@ -220,6 +220,28 @@ $sqlConnection.ConnectionString =$ConnectionString
 
 
 
+#-----------------------------------------------------------------------------#
+#                                                                             #
+#   Function        $source                                                   #
+#                                                                             #
+#   Description     C# source of the PSService.exe stub                       #
+#                                                                             #
+#   Arguments                                                                 #
+#                                                                             #
+#   Notes           The lines commented with "SET STATUS" and "EVENT LOG" are #
+#                   optional. (Or blocks between "// SET STATUS [" and        #
+#                   "// SET STATUS ]" comments.)                              #
+#                   SET STATUS lines are useful only for services with a long #
+#                   startup time.                                             #
+#                   EVENT LOG lines are useful for debugging the service.     #
+#                                                                             #
+#   History                                                                   #
+#                                                                             #
+#-----------------------------------------------------------------------------#
+
+
+
+
 
 
 $source = @"
@@ -627,10 +649,6 @@ Time       : $RequestTime
         $sqlConnection.Close()
     }
 
-    if($delayIteration -gt 0)
-    {
-        Start-Sleep -s $delayIteration
-    }
 }
 
 
@@ -1022,28 +1040,6 @@ Function Receive-PipeHandlerThread () {
   Receive-PSThread -PSThread $pipeThread -AutoRemove
 }
 
-#-----------------------------------------------------------------------------#
-#                                                                             #
-#   Function        $source                                                   #
-#                                                                             #
-#   Description     C# source of the PSService.exe stub                       #
-#                                                                             #
-#   Arguments                                                                 #
-#                                                                             #
-#   Notes           The lines commented with "SET STATUS" and "EVENT LOG" are #
-#                   optional. (Or blocks between "// SET STATUS [" and        #
-#                   "// SET STATUS ]" comments.)                              #
-#                   SET STATUS lines are useful only for services with a long #
-#                   startup time.                                             #
-#                   EVENT LOG lines are useful for debugging the service.     #
-#                                                                             #
-#   History                                                                   #
-#                                                                             #
-#-----------------------------------------------------------------------------#
-
-
-
-
 
 
 
@@ -1215,13 +1211,14 @@ if ($Service) {                 # Run the service
     ###### Example that wakes up and logs a line every 10 sec: ######
     # Start a periodic timer
     $timerName = "Sample service timer"
-    $period = 10 # seconds
+    $period = $delayIteration # seconds
     $timer = new-object System.Timers.Timer
     $timer.Interval = ($period * 1000) # Milliseconds
     $timer.AutoReset = $true # Make it fire repeatedly
     Register-ObjectEvent $timer -EventName Elapsed -SourceIdentifier $timerName -MessageData "TimerTick"
     $timer.start() # Must be stopped in the finally block
     # Now enter the main service event loop
+    $busy=$false
     do { # Keep running until told to exit by the -Stop handler
       $event = Wait-Event # Wait for the next incoming event
       $source = $event.SourceIdentifier
@@ -1249,9 +1246,24 @@ if ($Service) {                 # Run the service
             }
           }
         }
-        "TimerTick" { # Example. Periodic event generated for this example
+        "TimerTick" 
+        { 
+        
+           
           
-          DoMonitor
+          # Periodic event generated for this example
+          Log "$scriptName BUSY $busy"
+          if($busy -eq $true) 
+          {
+            Log "$scriptName -Service # found busy service (try next time)"
+            return
+          }
+          
+           $busy=$true
+           Log "$scriptName -Service # start monitoring iteration"
+           DoMonitor          
+           Log "$scriptName -Service # end monitoring iteration"
+           $busy=$false
 
         }
         default { # Should not happen
