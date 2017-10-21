@@ -49,7 +49,7 @@ You can configure application settings in two ways:
 1. editing script inline (see section "Application settings")
 2. manage settings in a separate files (recommended). Application looks for "settings.ps1" file into app directory and overwrite default settings with that one.
 
-You can copy settings remaning it correctly [download file](http://tbd)
+You can copy settings remaning it correctly [download file](https://raw.githubusercontent.com/zeppaman/Powershell-Http-Monitor/master/src/sample.settings.ps1)
 
 Settings are very easy to undestand and with some attention you will be able to get the right tuning.
 
