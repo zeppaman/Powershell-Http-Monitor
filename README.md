@@ -16,6 +16,17 @@ Running this command the script read all websites, try to call them and finally 
 ```powershell
   Http-Monitor -Run
 ```
+### Run as scheduled task
+It is very easy to configure. Key settings:
+
+1. run it every 5 minute (or other interval)
+2. set the script path
+3. tell to scheduler to do not start multiple instances
+
+See screeshot for all steps:
+Inline-style: 
+![Create a new scheduled task for Http monitoring tool](https://github.com/zeppaman/Powershell-Http-Monitor/blob/master/doc/scheduled_1.png?raw=true "Create a new scheduled task for Http monitoring tool")
+
 
 ### Run as service
 This install the powershell script as service.
