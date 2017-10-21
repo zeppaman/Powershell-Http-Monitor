@@ -14,7 +14,7 @@ Simply, Powershell Http Monitor tool has two possible usage.
 Running this command the script read all websites, try to call them and finally download results into MSSQL database or log files. This usage mode desn't require any installation. It may be also scheduled using windows scheduled tasks.
 
 ```powershell
-  Http-Monitor-Tool -Run
+  Http-Monitor -Run
 ```
 
 ### Run as service
@@ -22,12 +22,12 @@ This install the powershell script as service.
 
 ```powershell
   
-  PS > Http-Monitor-Tool -Setup
+  PS > Http-Monitor -Setup
 
 
   #once it is installed you can control using script or service.mmc
-  PS >  Http-Monitor-Tool -Start
-  PS >  Http-Monitor-Tool -Stop
+  PS >  Http-Monitor -Start
+  PS >  Http-Monitor -Stop
 ```
 
 ## Configure
@@ -43,6 +43,59 @@ The file path must match application settings path. The file must contain the li
 
 ## Generate website list from IIS 
 This may be useful to monitor all sites into one iis server. To do this it is needed to use appcmd command to dump binding into a text file. It is easy to process using regexp to translate into a list of site url.
+
+## Settings
+You can configure application settings in two ways:
+1. editing script inline (see section "Application settings")
+2. manage settings in a separate files (recommended). Application looks for "settings.ps1" file into app directory and overwrite default settings with that one.
+
+You can copy settings remaning it correctly [download file](http://tbd)
+
+Settings are very easy to undestand and with some attention you will be able to get the right tuning.
+
+
+```powershell
+  
+
+######################################
+#
+# Application Settings
+#
+######################################
+
+
+# DB SETTINGS
+# -----------------------------------   
+$writeToDB= $true # enable or disable db logging
+$DBServer = "(localdb)\Projects" # MSSQL host, usully .\SQLEXPRESS, .\SQLSERVER 
+$DBName = "httpstatus" # name of db.(HAVE TO BE CREATED)
+$ConnectionString = "Server=$DBServer;Database=$DBName;Integrated Security=True;" # full connection string. Write here password if not in integrated security
+
+# EMAIL SETTINGS
+# -----------------------------------
+$sendEmail=$true  #enable email send
+$emailErrorCodes=500,200 # list of status codes that produces error
+$emailFrom="Http Monitor Tool <no-reply@my-address-email.io>"
+$emailTo="Me <destination email@my-address-email.io>"
+$smtpServer="127.0.01"  #smtp server. To use autenticated smtp server you have to change Do-Monitor function.
+$errorSubject="Http-Monitor:  Get Error on site" # subject of email notification
+$errorBody="Monitoring script get an errror. See details." #subject of error body
+
+# MONITOR SETTINGS
+# ----------------------------------   
+$dbpath=$workingPath+"\db.txt"  # db of web sites to monitor. One per line. Must have protocol predix. i.e. http://www.google.it
+$monitoring= @() # list of ips to monitor. This is used to focus ips on some destination only "8.8.8.8","4.4.4.4"
+$userAgent = [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome  #agent used to download files
+$delay=5  # number of seconds to wait between checking website inside a full run (used to avoid server overload)
+$delayIteration=100 # number of seconds between checks ( once I checked all sites, I wait this time before a full control)
+
+# LOGGING FILES
+# ----------------------------------
+$traceFile=$workingPath+"\tomonitor.txt" # log of monitored sites
+$errorFile=$workingPath+"\error.txt" # error only file
+$outFile=$workingPath+"\out.txt" # full log file
+
+```
 
 ### License
 
