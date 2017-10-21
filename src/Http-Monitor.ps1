@@ -136,26 +136,25 @@ function Get-ScriptDirectory {
 #   This script name, with various levels of details
 #
 ######################################
+$workingPath=Get-ScriptDirectory
 $argv0 = Get-Item $MyInvocation.MyCommand.Definition
 $script = $argv0.basename               # Ex: PSService
 $scriptName = $argv0.name               # Ex: PSService.ps1
 $scriptFullName = $argv0.fullname       # Ex: C:\Temp\PSService.ps1
-$serviceName = $script                  # A one-word name used for net start commands
+$serviceName = $script.Replace("-","_")                  # A one-word name used for net start commands
 $serviceDisplayName = "Http Monitor Powershell Tool"
 $ServiceDescription = "Monitor a list of websites using http request and stores result to db"
 $pipeName = "Service_$serviceName"      # Named pipe name. Used for sending messages to the service task
 # $installDir = "${ENV:ProgramFiles}\$serviceName" # Where to install the service files
-$installDir = "$workingPath\install"  # Where to install the service files
+$installDir = "$workingPath"  # Where to install the service files
 $scriptCopy = "$installDir\$scriptName"
 $exeName = "$serviceName.exe"
 $exeFullName = "$installDir\$exeName"
 $logDir = "$installDir\Logs"          # Where to log the service messages
 $logFile = "$logDir\$serviceName.log"
 $logName = "Application"    
-$errorSubject="Http-Monitor:  Get Error on site"
-$errorBody="Monitoring script get an errror. See details."
 $scriptCopyCname = $scriptCopy -replace "\\", "\\" # Double backslashes. (The first \\ is a regexp with \ escaped; The second is a plain string.)
-$workingPath=Get-ScriptDirectory
+
 
 
 
@@ -182,6 +181,8 @@ $emailErrorCodes=500,200 # list of status codes that produces error
 $emailFrom="Http Monitor Tool <no-reply@my-address-email.io>"
 $emailTo="Me <destination email@my-address-email.io>"
 $smtpServer="127.0.01"  #smtp server. To use autenticated smtp server you have to change Do-Monitor function.
+$errorSubject="Http-Monitor:  Get Error on site" # subject of email notification
+$errorBody="Monitoring script get an errror. See details." #subject of error body
 
 # MONITOR SETTINGS
 # ----------------------------------   
@@ -1078,11 +1079,7 @@ if ($Monitor) {
     return
 }
 
-if ($Setup) 
-{
-Log ""
-New-Item -ItemType Directory -Force -Path $installDir
-}    # Insert one blank line to separate test sessions logs
+
 Log $MyInvocation.Line # The exact command line that was used to start us
 
 # The following commands write to the event log, but we need to make sure the PSService source is defined.
@@ -1154,14 +1151,8 @@ if ($Setup) {                   # Install the service
   # Check if it's necessary
   try {
     $pss = Get-Service $serviceName -ea stop # Will error-out if not installed
-    # Check if this script is newer than the installed copy.
-    if ((Get-Item $scriptCopy -ea SilentlyContinue).LastWriteTime -lt (Get-Item $scriptFullName -ea SilentlyContinue).LastWriteTime) {
-      Write-Verbose "Service $serviceName is already Installed, but requires upgrade"
-      & $scriptFullName -Remove
-      throw "continue"
-    } else {
-      Write-Verbose "Service $serviceName is already Installed, and up-to-date"
-    }
+    #service installed. Nothing to do
+    Write-Warning "Service installed nothing to do."
     exit 0
   } catch {
     # This is the normal case here. Do not throw or write any error!
@@ -1171,11 +1162,7 @@ if ($Setup) {                   # Install the service
   if (!(Test-Path $installDir)) {
     New-Item -ItemType directory -Path $installDir | Out-Null
   }
-  # Copy the service script into the installation directory
-  if ($ScriptFullName -ne $scriptCopy) {
-    Write-Verbose "Installing $scriptCopy"
-    Copy-Item $ScriptFullName $scriptCopy
-  }
+  
   # Generate the service .EXE from the C# source embedded in this script
   try {
     Write-Verbose "Compiling $exeFullName"
@@ -1210,20 +1197,7 @@ if ($Remove) {                  # Uninstall the service
   } else {
     Write-Verbose $msg
   }
-  # Remove the installed files
-  if (Test-Path $installDir) {
-    foreach ($ext in ("exe", "pdb", "ps1")) {
-      $file = "$installDir\$serviceName.$ext"
-      if (Test-Path $file) {
-        Write-Verbose "Deleting file $file"
-        Remove-Item $file
-      }
-    }
-    if (!(@(Get-ChildItem $installDir -ea SilentlyContinue)).Count) {
-      Write-Verbose "Removing directory $installDir"
-      Remove-Item $installDir
-    }
-  }
+  
   return
 }
 
