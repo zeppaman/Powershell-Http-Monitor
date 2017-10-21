@@ -24,8 +24,23 @@ It is very easy to configure. Key settings:
 3. tell to scheduler to do not start multiple instances
 
 See screeshot for all steps:
-Inline-style: 
+#### Create a new scheduled task
 ![Create a new scheduled task for Http monitoring tool](https://github.com/zeppaman/Powershell-Http-Monitor/blob/master/doc/scheduled_1.png?raw=true "Create a new scheduled task for Http monitoring tool")
+
+#### Setup timing
+The trick is to define a task starting once (now) but repeaded indefinitely every *x* minutes
+![Setup timing for Http monitoring tool](https://github.com/zeppaman/Powershell-Http-Monitor/blob/master/doc/scheduled_2.png?raw=true "Setup timing for Http monitoring tool")
+
+#### Define startup script
+This is easy. You have only to following text into editbox (just replace <pathtofile> with you absolute filepath).
+```powershell
+   Powershell -file "<pathtofile>\Http-Monitor.ps1"
+```
+![CDefine startup script for Http monitoring tool](https://github.com/zeppaman/Powershell-Http-Monitor/blob/master/doc/scheduled_3.png?raw=true "Define startup script for Http monitoring tool")
+
+#### Avoid multiple instances
+Last step of wizard is needed to avoid multiple instance at the same time. Just choose "do not allow new instance" in drop down.
+![Avoid multiple instances for Http monitoring tool](https://github.com/zeppaman/Powershell-Http-Monitor/blob/master/doc/scheduled_4.png?raw=true "Avoid multiple instances for Http monitoring tool")
 
 
 ### Run as service
