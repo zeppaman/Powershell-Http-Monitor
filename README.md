@@ -1,3 +1,9 @@
+<!--
+  Title: Powershell Http Monitor
+  Description: Powershell tool for monitoring a set of http hosts that logs into MSSQL database.
+  Author: Daniele Fontani
+  Tags: powershell,http,monitor,database,opensource,free
+  -->
 # Powershell Http Monitor Tool
 This is a Powershell tool for monitoring a set of http hosts that logs into MSSQL database. You can download the lastest version [here](https://github.com/zeppaman/Powershell-Http-Monitor/releases/)
 
