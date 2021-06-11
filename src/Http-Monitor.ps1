@@ -502,7 +502,7 @@ Function WriteLogToDB {
 Function DoMonitor
 {
     Write-Host "Startin monitor session"
-
+<#
     # Quit if the SQL connection didn't open properly.
     if ($sqlConnection.State -ne [Data.ConnectionState]::Open) {
         $sqlConnection.Open()
@@ -510,13 +510,14 @@ Function DoMonitor
 
     CreateTableIfNotExists $sqlConnection
  
-
+#>
     #get content from db file (one host for each rows)
     $a = Get-Content $dbpath
    
     foreach( $line in $a)
     {
         Write-Host $line
+        $logFileName = $workingPath + "\" + $line.Substring($line.IndexOf("//")+2) + ".txt"
         $toMonitor=$true
         $ip=""
         $monitored="UNKNOWN"
@@ -531,7 +532,7 @@ Function DoMonitor
             try
             {
                 $ip=[System.Net.Dns]::GetHostAddresses($line.Substring($line.IndexOf("//")+2)).IPAddressToString
-                Write-Host $line " resond to ip " $ip
+                #Add-Content $outFile "$line resond to ip $ip"
                 $monitored="OK"
 
                 if($monitoring.Length -gt 0)
@@ -546,7 +547,7 @@ Function DoMonitor
             catch
             {
                 $toMonitor=$false
-                Write-Warning " $line unable to resolve IP "
+                Add-Content $outFile "$line unable to resolve IP $_"
                 throw $_
                 $monitored="NOT RESOLVED"
             }
@@ -570,7 +571,7 @@ Function DoMonitor
             try
             {
                 $RequestTime = Get-Date
-                $R = Invoke-WebRequest -URI $line -UserAgent $userAgent
+                $R = Invoke-WebRequest -URI $line -UserAgent $userAgent -UseBasicParsing
                 $TimeTaken = ((Get-Date) - $RequestTime).TotalMilliseconds 
                 $status=$R.StatusCode
                 $len=$R.RawContentLength
@@ -579,7 +580,7 @@ Function DoMonitor
             catch 
             {
                 #many http status fall in exception 
-                $status=$_.Exception.Response.StatusCode.Value__
+                $status=$_.Exception.Response.StatusCode.Value__ + " error, StatusCode: " + $R.StatusCode + " " + $_
                 $len=0
             }
 
@@ -592,7 +593,8 @@ Function DoMonitor
             }
 
             # Write to log
-            Add-Content $outFile "$line  $status $len"
+            Add-Content $outFile "$(Now) $line $status $len"
+            Add-Content $logFileName "$(Now) $line $status $len"
 
            
 
@@ -643,7 +645,7 @@ Time       : $RequestTime
         else
         {
              # Write to log
-            Add-Content $outFile "$line  not monitored. IP may be unre"
+            Add-Content $outFile "$line  not monitored. IP may be unrechable"
         }
         
 
@@ -661,12 +663,12 @@ Time       : $RequestTime
 
     }
 
-
+<#
     # Close the connection.
     if ($sqlConnection.State -eq [Data.ConnectionState]::Open) {
         $sqlConnection.Close()
     }
-
+#>
 }
 
 
